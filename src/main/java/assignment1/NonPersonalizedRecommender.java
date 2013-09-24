@@ -3,6 +3,7 @@ package assignment1;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Set;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
@@ -13,10 +14,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Resources;
 
+import static com.google.common.collect.ArrayListMultimap.create;
+
 public abstract class NonPersonalizedRecommender
 {
-	public abstract Multimap<Integer, ScoreHolder> recommend(Integer... movieIds);
-
 	protected List<UserMovieRating> data = Lists.newArrayList();
 
 	public final static Splitter SPLITTER = Splitter.on(",");
@@ -26,6 +27,19 @@ public abstract class NonPersonalizedRecommender
 	protected Multimap<Integer, UserMovieRating> ratingsByUser;
 
 	protected Multimap<Integer, UserMovieRating> ratingsByMovie;
+
+	protected Multimap<Integer, ScoreHolder> simpleScores = create();
+
+	protected Multimap<Integer, ScoreHolder> advancedScores = create();
+
+	public abstract void score(Integer... movieIds);
+
+	protected final String fileName;
+
+	public NonPersonalizedRecommender(String f)
+	{
+		fileName = f;
+	}
 
 	protected void load(String ratingsFileName)
 	{
@@ -65,24 +79,6 @@ public abstract class NonPersonalizedRecommender
 		assert ratingsByMovie.keySet().size() == 100: "Total movies should be 100";
 	}
 
-	public int getUserCount()
-	{
-		return ratingsByUser.keySet().size();
-	}
-
-	public int getMovieCount()
-	{
-		return ratingsByMovie.keySet().size();
-	}
-
-	protected void print(int movieId)
-	{
-		for (UserMovieRating entry: ratingsByMovie.get(movieId))
-		{
-			System.out.println(entry);
-		}
-	}
-
 	public String format(Multimap<Integer, ScoreHolder> ratings, int limit, Integer X)
 	{
 		DecimalFormat df = new DecimalFormat("0.00");
@@ -106,5 +102,50 @@ public abstract class NonPersonalizedRecommender
 		}
 
 		return JOINER.join(result);
+	}
+
+	public int getUserCount()
+	{
+		return ratingsByUser.keySet().size();
+	}
+
+	public int getMovieCount()
+	{
+		return ratingsByMovie.keySet().size();
+	}
+
+	public Set<Integer> getAllUsers()
+	{
+		return ratingsByUser.keySet();
+	}
+
+	/**
+	 * (X and Y)/X
+	 * <p>
+	 * Eg. We want to find the correlation between Star Wars and others, and let we start with The Matrix. If - Star
+	 * Wars was rated by 16 people out of 20 and out of those 16 people, 8 also rated for Matrix. Then the correlation
+	 * is 8/16 = 50%. Now take Inception and try to find the correlation of the Star Wars and Inception. Now from the
+	 * above, we know that 16 people rated Star Wars, assume that 12 out of these 16 rated Inception. (We don't care
+	 * about what ratings they gave to the movie.) Then the correlation is 12/16 = 75%
+	 * </p>
+	 */
+	public Multimap<Integer, ScoreHolder> getSimpleScores()
+	{
+		return simpleScores;
+	}
+
+	/**
+	 * ((X and Y) / X) / ((!X and Y) / !X)
+	 * <p>
+	 * Eg. Star Wars and Matrix If - Star Wars was rated by 16 people out of 20 and out of those 16 people, 8 also rated
+	 * for Matrix. Now, there are 4 people who did not rate Star wars (20 - 16) , and out of these 4 people, 1 person
+	 * did rate Matrix, then ((8)/16) / ((1)/4) 0.5 / 0.25 = 2 is the correlation. (tip: Advanced corr can be more than
+	 * 1) Numerator - same as the simple correlation. Denominator - (How many rated for matrix but did not vote SW/
+	 * number of people who did not rate SW)
+	 * </p>
+	 */
+	public Multimap<Integer, ScoreHolder> getAdvancedScores()
+	{
+		return advancedScores;
 	}
 }
