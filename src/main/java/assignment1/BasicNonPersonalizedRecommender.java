@@ -31,7 +31,7 @@ public class BasicNonPersonalizedRecommender extends NonPersonalizedRecommender
 			System.err.println(String.format("Totoal ratings for movie %d is %d", movieX, ratingsByMovie.get(movieX).size()));
 
 			// find all users who rated the current movie X
-			Set<Integer> usersWhoRatedX = getUsersWhoRatedMovieX(movieX);
+			Set<Integer> usersWhoRatedX = getUsersWhoRatedMovie(movieX);
 
 			List<ScoreHolder> simple = newArrayList();// Collections.reverseOrder()
 			List<ScoreHolder> advanced = newArrayList();
@@ -45,7 +45,7 @@ public class BasicNonPersonalizedRecommender extends NonPersonalizedRecommender
 				 */
 				if (!movieY.equals(movieX))
 				{
-					Set<Integer> usersWhoRatedY = getUsersWhoRatedMovieX(movieY);
+					Set<Integer> usersWhoRatedY = getUsersWhoRatedMovie(movieY);
 
 					Set<Integer> usersWhoRatedBothXAndY = intersection(usersWhoRatedX, usersWhoRatedY);
 
@@ -84,7 +84,7 @@ public class BasicNonPersonalizedRecommender extends NonPersonalizedRecommender
 		System.out.println("----------------------------------------------------------------------------------------------------");
 	}
 
-	private Set<Integer> getUsersWhoRatedMovieX(Integer movieX)
+	private Set<Integer> getUsersWhoRatedMovie(Integer movieX)
 	{
 		Set<Integer> usersWhoRatedX = newHashSet();
 
