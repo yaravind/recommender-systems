@@ -85,11 +85,10 @@ public class CBFMain
 	}
 
 	/**
-	 * Create the LensKit recommender configuration.
+	 * Create the LensKit recommender configuration for <b>unweighted</b> user profile creation.
 	 * 
 	 * @return The LensKit recommender configuration.
 	 */
-	// LensKit configuration API generates some unchecked warnings, turn them off
 	@SuppressWarnings ("unchecked")
 	public static LenskitConfiguration configureRecommender()
 	{
@@ -112,6 +111,36 @@ public class CBFMain
 
 		// use the TF-IDF scorer you will implement to score items
 		config.bind(ItemScorer.class).to(TFIDFItemScorer.class);
+		return config;
+	}
+
+	/**
+	 * Create the LensKit recommender configuration for <b>weighted</b> user profile creation.
+	 * 
+	 * @return The LensKit recommender configuration.
+	 */
+	@SuppressWarnings ("unchecked")
+	public static LenskitConfiguration configureWeightedRecommender()
+	{
+		LenskitConfiguration config = new LenskitConfiguration();
+		// configure the rating data source
+		config.bind(EventDAO.class).to(MOOCRatingDAO.class);
+		config.set(RatingFile.class).to(new File("data/ratings.csv"));
+
+		// use custom item and user DAOs
+		// specify item DAO implementation with tags
+		config.bind(ItemDAO.class).to(CSVItemTagDAO.class);
+		// specify tag file
+		config.set(TagFile.class).to(new File("data/movie-tags.csv"));
+		// and title file
+		config.set(TitleFile.class).to(new File("data/movie-titles.csv"));
+
+		// our user DAO can look up by user name
+		config.bind(UserDAO.class).to(MOOCUserDAO.class);
+		config.set(UserFile.class).to(new File("data/users.csv"));
+
+		// use the TF-IDF scorer you will implement to score items
+		config.bind(ItemScorer.class).to(WeightedTFIDFItemScorer.class);
 		return config;
 	}
 }
