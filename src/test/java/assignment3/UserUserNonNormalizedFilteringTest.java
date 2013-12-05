@@ -2,11 +2,6 @@ package assignment3;
 
 import java.util.Map;
 
-import org.grouplens.lenskit.ItemRecommender;
-import org.grouplens.lenskit.Recommender;
-import org.grouplens.lenskit.core.LenskitConfiguration;
-import org.grouplens.lenskit.core.LenskitRecommender;
-import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,18 +20,6 @@ import static org.junit.Assert.assertEquals;
 public class UserUserNonNormalizedFilteringTest
 {
 	Logger logger = LoggerFactory.getLogger(getClass());
-
-	LenskitConfiguration config;
-	Recommender rec;
-	ItemRecommender irec;
-
-	@Before
-	public void setUp() throws Exception
-	{
-		config = UUMain.configureRecommender();
-		rec = LenskitRecommender.build(config);
-		irec = rec.getItemRecommender();
-	}
 
 	@Test
 	public void weighted1024()
